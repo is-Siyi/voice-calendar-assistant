@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>语音日历助手</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel hero-panel">
+        <div>
+          <p class="eyebrow">Voice Calendar Assistant</p>
+          <h1>语音日历助手</h1>
+          <p class="intro">
+            用自然语言添加、查看和删除日程提醒，让日历管理更接近真实说话习惯。
+          </p>
+        </div>
+        <div class="status-card">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">等待指令</span>
+        </div>
+      </section>
+
+      <section class="panel command-panel">
+        <label for="commandInput">语音或文字指令</label>
+        <textarea
+          id="commandInput"
+          rows="3"
+          placeholder="例如：明天下午三点提醒我开会"
+        ></textarea>
+
+        <div class="actions">
+          <button id="voiceButton" class="primary-button" type="button">开始语音</button>
+          <button id="runButton" type="button">执行指令</button>
+          <button id="clearButton" type="button">清空输入</button>
+        </div>
+
+        <div class="hint-list">
+          <span>明天下午三点提醒我开会</span>
+          <span>查看明天的安排</span>
+          <span>删除明天下午三点的开会提醒</span>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel result-panel">
+          <h2>解析结果</h2>
+          <dl>
+            <div>
+              <dt>操作</dt>
+              <dd id="intentValue">-</dd>
+            </div>
+            <div>
+              <dt>日期</dt>
+              <dd id="dateValue">-</dd>
+            </div>
+            <div>
+              <dt>时间</dt>
+              <dd id="timeValue">-</dd>
+            </div>
+            <div>
+              <dt>事项</dt>
+              <dd id="titleValue">-</dd>
+            </div>
+          </dl>
+          <p id="message" class="message">输入一句日程指令后，这里会显示执行结果。</p>
+        </div>
+
+        <div class="panel schedule-panel">
+          <div class="section-heading">
+            <h2>日程提醒</h2>
+            <button id="showAllButton" type="button">查看全部</button>
+          </div>
+          <ul id="eventList" class="event-list"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
