@@ -145,7 +145,7 @@ function parseDate(command) {
   const relative = offsetMap.find((item) => command.includes(item.keyword));
   if (relative) return toDateKey(addDays(today, relative.offset));
 
-  const monthDayMatch = command.match(/(\\d{1,2})月(\\d{1,2})(日|号)?/);
+  const monthDayMatch = command.match(/(\d{1,2})月(\d{1,2})(日|号)?/);
   if (monthDayMatch) {
     const date = new Date(today.getFullYear(), Number(monthDayMatch[1]) - 1, Number(monthDayMatch[2]));
     return toDateKey(date);
@@ -155,17 +155,19 @@ function parseDate(command) {
 }
 
 function parseTime(command) {
-  const timeMatch = command.match(/(凌晨|早上|上午|中午|下午|晚上)?(\\d{1,2})点(半|\\d{1,2}分?)?/);
+  const timeMatch = command.match(
+    /(凌晨|早上|上午|中午|下午|晚上)?([0-9]{1,2}|[零〇一二两三四五六七八九十]{1,3})点(半|([0-9]{1,2}|[零〇一二两三四五六七八九十]{1,3})分?)?/
+  );
   if (!timeMatch) return "";
 
   const period = timeMatch[1] || "";
-  let hour = Number(timeMatch[2]);
+  let hour = parseChineseNumber(timeMatch[2]);
   let minute = 0;
 
   if (timeMatch[3] === "半") {
     minute = 30;
   } else if (timeMatch[3]) {
-    minute = Number(timeMatch[3].replace("分", ""));
+    minute = parseChineseNumber(timeMatch[4] || timeMatch[3].replace("分", ""));
   }
 
   if ((period === "下午" || period === "晚上") && hour < 12) {
@@ -179,14 +181,46 @@ function parseTime(command) {
   return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
+function parseChineseNumber(value) {
+  if (/^\d+$/.test(value)) return Number(value);
+
+  const map = {
+    零: 0,
+    "〇": 0,
+    一: 1,
+    二: 2,
+    两: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+  };
+
+  if (value === "十") return 10;
+  if (value.startsWith("十")) return 10 + (map[value[1]] || 0);
+  if (value.includes("十")) {
+    const [tens, ones] = value.split("十");
+    return (map[tens] || 1) * 10 + (map[ones] || 0);
+  }
+
+  return map[value] ?? Number(value);
+}
+
 function parseTitle(command, intent) {
   let title = command
     .replace(/^(请|帮我|麻烦)?/, "")
     .replace(/(今天|明天|后天)/g, "")
-    .replace(/\\d{1,2}月\\d{1,2}(日|号)?/g, "")
-    .replace(/(凌晨|早上|上午|中午|下午|晚上)?\\d{1,2}点(半|\\d{1,2}分?)?/g, "")
+    .replace(/\d{1,2}月\d{1,2}(日|号)?/g, "")
+    .replace(
+      /(凌晨|早上|上午|中午|下午|晚上)?([0-9]{1,2}|[零〇一二两三四五六七八九十]{1,3})点(半|([0-9]{1,2}|[零〇一二两三四五六七八九十]{1,3})分?)?/g,
+      ""
+    )
     .replace(/提醒我|添加|新增|创建|安排|查看|看看|查询|显示|删除|取消|移除/g, "")
     .replace(/的安排|日程|提醒/g, "")
+    .replace(/^的/, "")
     .trim();
 
   if (!title && intent === "view") return "查看日程";
@@ -305,7 +339,7 @@ function setMessage(text, type = "") {
 function normalize(text) {
   return String(text || "")
     .replace(/[，。！？、,.!?]/g, " ")
-    .replace(/\\s+/g, "")
+    .replace(/\s+/g, "")
     .trim();
 }
 
